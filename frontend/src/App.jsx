@@ -1,49 +1,63 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';  
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';  
 import Login from './pages/Login';
-import Registration from './pages/Registration';  
+import Registration from './pages/Registration';
 import UserForm from './pages/UserForm';
 import AdminDashboard from './pages/AdminDashboard';
 import Navbar from './components/Navbar';
-import ProtectedRoute from './components/ProtectedRoute';  
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
-  const token = localStorage.getItem('token');
-  let role = null;
+  const [user, setUser] = useState(null);
 
-  if (token) {
-    const decode = (token) => {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = atob(base64);
-      return JSON.parse(jsonPayload);
-    };
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const storedUser = JSON.parse(localStorage.getItem('user'));
+      setUser(storedUser);
+    }
+  }, []);
 
-    const decodedToken = decode(token);
-    role = decodedToken.role;
-  }
+  const handleLogin = (userData) => {
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+  };
 
   return (
     <Router>
-      <Navbar />  
-      
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Registration />} />  
+      <Navbar user={user} onLogout={handleLogout} />
+
+      <Routes>  
+        <Route path="/login" element={<Login onLogin={handleLogin} />} />
+
+        <Route path="/register" element={<Registration />} />
+
         <Route
           path="/user-form"
           element={
-            <ProtectedRoute role={role} requiredRole="user" element={<UserForm />} />
+            <ProtectedRoute user={user} requiredRole="user">
+              <UserForm />
+            </ProtectedRoute>
           }
         />
+
         <Route
           path="/admin-dashboard"
           element={
-            <ProtectedRoute role={role} requiredRole="admin" element={<AdminDashboard />} />
+            <ProtectedRoute user={user} requiredRole="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
           }
         />
-        <Route path="/" element={<Login />} />
-      </Routes>
+
+        <Route path="/" element={<Navigate to="/login" />} />
+      </Routes>  
     </Router>
   );
 }

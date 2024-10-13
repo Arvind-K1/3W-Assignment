@@ -3,27 +3,24 @@ import axios from '../services/axiosConfig';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Login.css';
 
-function Login() {
+function Login({ onLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-
-  const decode = (token) => {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = atob(base64);
-    return JSON.parse(jsonPayload);
-  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       const res = await axios.post('/api/users/login', { email, password });
-      const { token } = res.data;
+      const token  = res.data.token;
+      const user = res.data.user;
+      
       localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
 
-      const decodedToken = decode(token);
-      if (decodedToken.role === 'admin') {
+      onLogin(user);
+
+      if (user.role === 'admin') {
         navigate('/admin-dashboard');
       } else {
         navigate('/user-form');

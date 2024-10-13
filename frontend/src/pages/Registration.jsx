@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import axios from '../services/axiosConfig';
-import { useNavigate } from 'react-router-dom';  // useNavigate for routing
-import '../styles/Registration.css';  // Assuming you have a CSS file for styling
+import { useNavigate } from 'react-router-dom';  
+import '../styles/Registration.css';  
 
 function Registration() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [socialHandle, setSocialHandle] = useState('');
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/users/register', { name, email, password });
+      await axios.post('/api/users/register', { name, email, password, socialHandle });
       alert('Registration successful, please log in.');
       navigate('/login');  
     } catch (err) {
@@ -28,6 +29,12 @@ function Registration() {
         placeholder="Name"
         value={name}
         onChange={(e) => setName(e.target.value)}
+      />
+      <input
+        type="text"
+        placeholder="Social Handle"
+        value={socialHandle}
+        onChange={(e) => setSocialHandle(e.target.value)}
       />
       <input
         type="email"

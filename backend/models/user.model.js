@@ -10,7 +10,6 @@ const userSchema = new mongoose.Schema({
     socialHandle: {
         type: String,
         required: true,
-        unique: true
     },
     images: [String],
     role: {
