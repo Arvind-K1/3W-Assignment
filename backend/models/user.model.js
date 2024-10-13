@@ -45,9 +45,7 @@ userSchema.methods = {
     generateJWTToken: function(){
         return jwt.sign({
             id: this._id,
-            role: this.role,
             email: this.email,
-            subscription: this.subscription
         },
         process.env.JWT_SECRET,
         {
